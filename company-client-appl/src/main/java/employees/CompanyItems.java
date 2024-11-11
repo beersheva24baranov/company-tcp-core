@@ -15,7 +15,7 @@ public static Item[] getItems(Company company) {
 		Item.of("display department budget", CompanyItems::getDepartmentBudget),
 		Item.of("display departments", CompanyItems::getDepartments),
 		Item.of("display managers with most factor", CompanyItems::getManagersWithMostFactor),
-  
+		Item.of("Save company state", CompanyItems::saveCompany)
 	};
 	return items;
 	
@@ -120,4 +120,10 @@ static void getManagersWithMostFactor(InputOutput io) {
 		.collect(Collectors.joining("\n"));
 	io.writeLine(line);
 }
+static void saveCompany(InputOutput io) {
+	if (company instanceof CompanyTcpProxy companyTcpProxy) {
+		companyTcpProxy.saveCompany();
+	}
+}
+
 }

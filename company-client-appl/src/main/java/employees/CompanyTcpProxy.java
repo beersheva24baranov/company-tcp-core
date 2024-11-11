@@ -1,5 +1,6 @@
 package employees;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.json.JSONArray;
@@ -22,11 +23,9 @@ public class CompanyTcpProxy implements Company{
     }
 
     @Override
-    public int getDepartmentBudget(String arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDepartmentBudget'");
+    public int getDepartmentBudget(String department) {
+        return Integer.valueOf(tcpClient.sendAndReceive("getDepartmentBudget", department));
     }
-
     @Override
     public String[] getDepartments() {
         String jsonStr = tcpClient.sendAndReceive("getDepartments", "");
@@ -36,21 +35,28 @@ public class CompanyTcpProxy implements Company{
     }
 
     @Override
-    public Employee getEmployee(long arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmployee'");
+    public Employee getEmployee(long id) {
+        String employeeJSON = tcpClient.sendAndReceive("getEmployee", id + "");
+        Employee employee = Employee.getEmployeeFromJSON(employeeJSON);
+        return employee;
     }
 
-    @Override
+   @Override
     public Manager[] getManagersWithMostFactor() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getManagersWithMostFactor'");
+        String jsonArrayString = tcpClient.sendAndReceive("getManagersWithMostFactor", "");
+        JSONArray jsonArray = new JSONArray(jsonArrayString);
+        String[] jsonObjectsStrings = jsonArray.toList().toArray(String[]::new);
+        return Arrays.stream(jsonObjectsStrings).map(Employee::getEmployeeFromJSON).toArray(Manager[]::new);
     }
 
     @Override
-    public Employee removeEmployee(long arg0) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'removeEmployee'");
+    public Employee removeEmployee(long id) {
+        String employeeJSON = tcpClient.sendAndReceive("removeEmployee", id + "");
+        Employee employee = Employee.getEmployeeFromJSON(employeeJSON);
+        return employee;
     }
 
+    public void saveCompany() {
+        tcpClient.sendAndReceive("saveCompany", "");
+    }
 }
