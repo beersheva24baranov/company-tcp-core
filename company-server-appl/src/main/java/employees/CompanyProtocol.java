@@ -1,13 +1,17 @@
 package employees;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import io.*;
 import net.*;
+@SuppressWarnings("unused")
 public class CompanyProtocol implements Protocol {
-    Company company;
-    private static final String FILE_NAME = "employees.data";
+    private final Company company;
+
     public CompanyProtocol(Company company) {
         this.company = company;
     }
@@ -16,86 +20,77 @@ public class CompanyProtocol implements Protocol {
     public Response getResponse(Request request) {
         String type = request.requestType();
         String data = request.requestData();
-        Response response = switch (type) {
-            case "addEmployee" -> addEmployee(data);
-            case "saveCompany" -> save();
-            case "removeEmployee" -> removeEmployee(data);
-            case "getManagersWithMostFactor" -> getManagersWithMostFactor();
-            case "getDepartments" -> getDepartments();
-            case "getEmployee" -> getEmployee(data);
-            case "getDepartmentBudget" -> getDepartmentBudget(data);
-            default -> new Response(ResponseCode.WRONG_TYPE, "Wrong type of command to server");
-        };
+        Response response;
+        try {
+            Method method = CompanyProtocol.class.getDeclaredMethod(type, String.class);
+            method.setAccessible(true);
+            response = (Response) method.invoke(this, data);
+        } catch (NoSuchMethodException e) {
+            response = new Response(ResponseCode.WRONG_TYPE, type + " is wrong type");
+        } catch (InvocationTargetException e) {
+            Throwable causeExc = e.getCause();
+            String message = causeExc == null ? e.getMessage() : causeExc.getMessage();
+            response = new Response(ResponseCode.WRONG_DATA, "Error: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return response;
     }
 
     private Response addEmployee(String data) {
-        Response res = null;
         Employee employee = Employee.getEmployeeFromJSON(data);
-        try {
-            company.addEmployee(employee);
-            res = new Response(ResponseCode.OK, "");
-        } catch (IllegalStateException e) {
-            res = new Response(ResponseCode.WRONG_DATA, 
-                    "Employee with this id already presents in the company");
-        }
-        return res;
-    }
-
-    private Response removeEmployee(String data) {
-        Response res = null;
-        long id = Integer.valueOf(data);
-        try {
-            company.removeEmployee(id);
-            res = new Response(ResponseCode.OK, "");
-        } catch (NoSuchElementException e) {
-            res = new Response(ResponseCode.WRONG_DATA, 
-                    "Employee with this id is not found in the company");
-        }
-        return res;
-    }
-
-    private Response getEmployee(String data) {
-        Response res = null;
-        long id = Long.valueOf(data);
-        Employee employee = company.getEmployee(id);
-        if (employee != null) {
-            res = new Response(ResponseCode.OK, employee.toString());
-        } else {
-            res = new Response(ResponseCode.WRONG_DATA, 
-                    "Employee with this id is not found in the company");
-        }
-        return res;
-    }
-
-    private Response getManagersWithMostFactor() {
-        Manager[] managers = company.getManagersWithMostFactor();
-        String[] jsonStrings = Arrays.stream(managers).map(Manager::toString).toArray(String[]::new);
-        JSONArray jsonArray = new JSONArray(jsonStrings);
-        return new Response(ResponseCode.OK, jsonArray.toString());
-    }
-
-    private Response getDepartments() {
-        String[] departments = company.getDepartments();
-        JSONArray departmentsJSON = new JSONArray(departments);
-        return new Response(ResponseCode.OK, departmentsJSON.toString());
+        company.addEmployee(employee);
+        return getOkResponse("");
     }
 
     private Response getDepartmentBudget(String data) {
-        int buget = company.getDepartmentBudget(data);
-        return new Response(ResponseCode.OK, buget + "");
+        int budget = company.getDepartmentBudget(data);
+        return getOkResponse(String.valueOf(budget));
     }
 
-    private Response save() {
-        Response res = null;
+    private Response getDepartments(String data) {
+        JSONArray jsonArr = new JSONArray(company.getDepartments());
+        return getOkResponse(jsonArr.toString());
+
+    }
+
+    private Response getManagersWithMostFactor(String data) {
+        Manager[] managers = company.getManagersWithMostFactor();
+        JSONArray jsonArr = new JSONArray(Arrays.stream(managers)
+                .map(Manager::toString)
+                .collect(Collectors.toList()));
+        return getOkResponse(jsonArr.toString());
+
+    }
+
+    private Response getEmployee(String data) {
+
+        long id = Long.parseLong(data);
+        Employee employee = company.getEmployee(id);
+        return notNullEmployeeCheck(employee);
+    }
+
+    private Response removeEmployee(String data) {
+        long id = Long.parseLong(data);
+        Employee employee = company.removeEmployee(id);
+        return notNullEmployeeCheck(employee);
+    }
+
+    private Response save(String data) {
         if (company instanceof Persistable persistable) {
-            try {
-                persistable.saveToFile(FILE_NAME);
-                res = new Response(ResponseCode.OK, "");
-            } catch (Exception e) {
-                res = new Response(ResponseCode.WRONG_DATA, e.getMessage());
-            }
+            persistable.saveToFile(ServerConfig.DATA_FILE);
+            return new Response(ResponseCode.OK, "Saved successfully");
+        } else {
+            return new Response(ResponseCode.WRONG_DATA, "This company does not support saving.");
         }
-        return res;
+    }
+
+    private Response notNullEmployeeCheck(Employee employee) {
+        return employee != null ? new Response(ResponseCode.OK, employee.toString())
+                : new Response(ResponseCode.WRONG_DATA, "Employee not found");
+    }
+
+    Response getOkResponse(String responseData) {
+        return new Response(ResponseCode.OK, responseData);
     }
 }
