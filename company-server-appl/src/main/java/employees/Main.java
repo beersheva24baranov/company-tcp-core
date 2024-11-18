@@ -14,7 +14,7 @@ public class Main {
         CompanySaver companySaver = new CompanySaver(company);
         if (company instanceof Persistable persistable) {
             persistable.restoreFromFile(FILE_NAME);
-            System.out.printf("Company data restored from the file %s\n", FILE_NAME);
+            System.out.printf("State of company restored from the file %s\n", FILE_NAME);
         }
         Thread treadTcpServer = new Thread(server);
         Thread treadCompanySaver = new Thread(companySaver);

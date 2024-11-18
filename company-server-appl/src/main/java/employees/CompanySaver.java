@@ -15,7 +15,7 @@ public class CompanySaver implements Runnable {
         while (true) {
             if (company instanceof Persistable persistable) {
                 if (persistable.saveTofile(FILE_NAME)) {
-                    System.out.printf("Company data saved in the file %s\n", FILE_NAME);
+                    System.out.printf("Company saved in the file %s\n", FILE_NAME);
                 }    
             }
             try {
