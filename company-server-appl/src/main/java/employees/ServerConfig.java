@@ -1,7 +1,7 @@
 package employees;
 
-public interface ServerConfigProperties {
+public interface ServerConfig {
     int PORT = 8088;
     String FILE_NAME = "employees.data";
-    int SAVING_DELAY = 5;
+    int SAVING_DELAY = 3;
 }

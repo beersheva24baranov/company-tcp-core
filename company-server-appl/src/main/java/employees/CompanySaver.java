@@ -1,7 +1,7 @@
 package employees;
 
 import io.Persistable;
-import static employees.ServerConfigProperties.*;
+import static employees.ServerConfig.*;
 
 public class CompanySaver implements Runnable {
     private Company company;
@@ -15,7 +15,7 @@ public class CompanySaver implements Runnable {
         while (true) {
             if (company instanceof Persistable persistable) {
                 if (persistable.saveTofile(FILE_NAME)) {
-                    System.out.printf("State of company saved in the file %s\n", FILE_NAME);
+                    System.out.printf("Company data saved in the file %s\n", FILE_NAME);
                 }    
             }
             try {

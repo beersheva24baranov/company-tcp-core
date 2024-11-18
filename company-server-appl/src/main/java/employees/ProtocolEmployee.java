@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import org.json.JSONArray;
 
-import static employees.ServerConfigProperties.*;
+import static employees.ServerConfig.*;
 
 @SuppressWarnings("unused")
 public class ProtocolEmployee implements Protocol {
