@@ -7,9 +7,9 @@ import net.*;
 
 public class Main {
 
-    //private static final String HOST = "192.168.3.78";
+   
     private static final String HOST = "localhost";
-    private static final int PORT = 18088;
+    private static final int PORT = 8088;
 
     public static void main(String[] args) {
         InputOutput io = new StandardInputOutput();
