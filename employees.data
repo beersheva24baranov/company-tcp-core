@@ -1,3 +1,4 @@
 {"basicSalary":9999,"className":"employees.Employee","id":1,"department":"QA"}
 {"basicSalary":9899,"className":"employees.Manager","id":2,"department":"Management","factor":2}
 {"hours":100,"basicSalary":7777,"className":"employees.WageEmployee","id":3,"department":"Accounting","wage":70}
+{"hours":100,"basicSalary":8000,"className":"employees.SalesPerson","id":6,"department":"Management","percent":10,"sales":550,"wage":100}
