@@ -1,1 +1,2 @@
-{"basicSalary":9999,"className":"employees.Employee","id":1111,"department":"QA"}
+{"basicSalary":9999,"className":"employees.Employee","id":1,"department":"QA"}
+{"basicSalary":9899,"className":"employees.Manager","id":2,"department":"Management","factor":2}

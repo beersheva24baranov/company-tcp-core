@@ -1,59 +1,57 @@
 package employees;
 
-import java.util.Iterator;
-
+import java.util.*;
 import org.json.JSONArray;
-
-import net.TcpClient;
+import net.NetworkClient;
 
 public class CompanyNetProxy implements Company {
-    TcpClient netClient;
+    NetworkClient client;
 
-    public CompanyNetProxy(TcpClient netClient) {
-        this.netClient = netClient;
+    public CompanyNetProxy(NetworkClient client) {
+        this.client = client;
     }
 
     @Override
     public Iterator<Employee> iterator() {
-        throw new UnsupportedOperationException("Unimplemented method 'iterator'");
+        return null;
     }
-    
 
     @Override
     public void addEmployee(Employee empl) {
-        netClient.sendAndReceive("Employees/add", empl.toString());
-    }
-
-    @Override
-    public Employee getEmployee(long id) {
-        String jsonStr = netClient.sendAndReceive("Employees/get", Long.toString(id));
-        return Employee.getEmployeeFromJSON(jsonStr);
-    }
-
-    @Override
-    public Manager[] getManagersWithMostFactor() {
-        String jsonStr = netClient.sendAndReceive("Employees/getManagersWithMostFactor", "");
-        JSONArray managers = new JSONArray(jsonStr);
-        return managers.toList().stream().map(i -> Employee.getEmployeeFromJSON(i.toString())).toArray(Manager[]::new);
-    }
-
-    @Override
-    public Employee removeEmployee(long id) {
-        String jsonStr = netClient.sendAndReceive("Employees/remove", Long.toString(id));
-        return Employee.getEmployeeFromJSON(jsonStr);
+        client.sendAndReceive("addEmployee", empl.toString());
     }
 
     @Override
     public int getDepartmentBudget(String department) {
-        String budget = netClient.sendAndReceive("Departments/getBudget", department);
-        return Integer.parseInt(budget);
+        return Integer.parseInt(client.sendAndReceive("getDepartmentBudget", department));
     }
 
     @Override
     public String[] getDepartments() {
-        String jsonStr = netClient.sendAndReceive("Departments/getList", "");
-        JSONArray jsonArray = new JSONArray(jsonStr);
-        String[] res = jsonArray.toList().toArray(String[]::new);
-        return res;
+        String jsonArrayStr = client.sendAndReceive("getDepartments", "");
+        JSONArray jsonArray = new JSONArray(jsonArrayStr);
+        return jsonArray.toList().toArray(String[]::new);
+    }
+
+    @Override
+    public Employee getEmployee(long id) {
+        String employeeJSON = client.sendAndReceive("getEmployee", id + "");
+        Employee employee = Employee.getEmployeeFromJSON(employeeJSON);
+        return employee;
+    }
+
+    @Override
+    public Manager[] getManagersWithMostFactor() {
+        String jsonArrayString = client.sendAndReceive("getManagersWithMostFactor", "");
+        JSONArray jsonArray = new JSONArray(jsonArrayString);
+        String[] jsonObjectsStrings = jsonArray.toList().toArray(String[]::new);
+        return Arrays.stream(jsonObjectsStrings).map(Employee::getEmployeeFromJSON).toArray(Manager[]::new);
+    }
+
+    @Override
+    public Employee removeEmployee(long id) {
+        String employeeJSON = client.sendAndReceive("removeEmployee", id + "");
+        Employee employee = Employee.getEmployeeFromJSON(employeeJSON);
+        return employee;
     }
 }

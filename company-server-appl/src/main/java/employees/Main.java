@@ -1,17 +1,24 @@
 package employees;
-import io.Persistable;
+
+import io.*;
 import net.*;
 
+import static employees.ServerConfigProperties.*;
 
 public class Main {
+
     public static void main(String[] args) {
         Company company = new CompanyImpl();
-        TcpServer server = new TcpServer(new CompanyProtocol(company), ServerConfig.PORT);
+        Protocol protocol = new ProtocolEmployee(company);
+        TcpServer server = new TcpServer(protocol, PORT);
+        CompanySaver companySaver = new CompanySaver(company);
         if (company instanceof Persistable persistable) {
-            persistable.restoreFromFile(ServerConfig.DATA_FILE);
-            AutoSaveThread autoSaveThread = new AutoSaveThread(persistable);
-            autoSaveThread.start();
+            persistable.restoreFromFile(FILE_NAME);
+            System.out.printf("State of company restored from the file %s\n", FILE_NAME);
         }
-        server.run();
+        Thread treadTcpServer = new Thread(server);
+        Thread treadCompanySaver = new Thread(companySaver);
+        treadTcpServer.start();
+        treadCompanySaver.start();
     }
 }

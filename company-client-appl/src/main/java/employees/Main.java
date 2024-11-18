@@ -1,35 +1,35 @@
 package employees;
 
 import view.*;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Arrays;
-
+import java.io.*;
+import java.util.*;
 import net.*;
 
 public class Main {
+
+    //private static final String HOST = "192.168.3.78";
     private static final String HOST = "localhost";
-    private static final int PORT = 8088;
+    private static final int PORT = 18088;
 
     public static void main(String[] args) {
         InputOutput io = new StandardInputOutput();
-        TcpClient netClient = new TcpClient(HOST, PORT);
-        Company company = new CompanyNetProxy(netClient);
+        NetworkClient client = new TcpClient(HOST, PORT);
+        Company company = new CompanyNetProxy(client);
         Item[] items = CompanyItems.getItems(company);
-        items = addExitItem(items, netClient);
-        Menu menu = new Menu("Company Network Application", items);
+        items = addExitItem(items, client);
+        Menu menu = new Menu("Company network application", items);
         menu.perform(io);
         io.writeLine("Application is finished");
     }
 
-    private static Item[] addExitItem(Item[] items, TcpClient netClient) {
+    private static Item[] addExitItem(Item[] items, NetworkClient client) {
         Item[] res = Arrays.copyOf(items, items.length + 1);
-        res[items.length] = Item.of("Exit", io -> {
+        res[res.length - 1] = Item.of("Exit", io -> {
             try {
-                if (netClient instanceof Closeable closeable) {
+                if (client instanceof Closeable closeable) {
                     closeable.close();
                 }
+                io.writeString("Session closed correcrly");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

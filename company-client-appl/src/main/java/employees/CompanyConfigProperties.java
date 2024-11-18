@@ -1,8 +1,8 @@
 package employees;
 
 public interface CompanyConfigProperties {
-    int MAX_SALARY = 30000;
-    int MIN_SALARY = 7000;
+    int MAX_BASIC_SALARY = 30000;
+    int MIN_BASIC_SALARY = 7000;
     float MIN_FACTOR = 1.5f;
     float MAX_FACTOR = 5.0f;
     int MIN_WAGE = 100;
@@ -13,8 +13,7 @@ public interface CompanyConfigProperties {
     float MAX_PERCENT = 10.0f;
     long MIN_SALES = 500;
     long MAX_SALES = Integer.MAX_VALUE;
-    long MIN_ID = 1000;
+    long MIN_ID = 1;
     long MAX_ID = 9999;
-    String FILE_NAME = "employees.data";
     String[] DEPARTMENTS = { "QA", "Development", "Accounting", "Management" };
 }
